@@ -7,18 +7,18 @@ public class Program
         {
 
             // System.Console.WriteLine("Hello World!");
-            DataStructures.Tables.Table t = new(new List<string> {"ID","name"}, new List<string> {"INT","VARCHAR(30)"}, "ID");
-            t.add_row(1, "Pale");
-            t.add_row(2, "Ignis");
-            t.add_row(3, "Shadow");
-            t.add_row(4, "Lucifer");
-            t.add_row(5, "Will");
-            t.add_row(6, "Franny");
-            t.add_row(787, "Emmy");
-            t.add_row(881, "Emmy");
-            t.add_row(7, "Emmy");
+            // DataStructures.Tables.Table t = new(new List<string> {"ID","name"}, new List<string> {"INT","VARCHAR(30)"}, "ID");
+            // t.add_row(1, "Pale");
+            // t.add_row(2, "Ignis");
+            // t.add_row(3, "Shadow");
+            // t.add_row(4, "Lucifer");
+            // t.add_row(5, "Will");
+            // t.add_row(6, "Franny");
+            // t.add_row(787, "Emmy");
+            // t.add_row(881, "Emmy");
+            // t.add_row(7, "Emmy");
             
-            t.show();
+            // t.show();
 
             // t.UpdateRowValue(5, "ID", 787);
             // t.show("After UpdateRowValue.");
@@ -94,38 +94,13 @@ public class Program
             
             tablilla.show("Tablilla");
 
-            tablilla.TableToFile();
-            
+            // tablilla.TableToFile("tablilla");
+
+            System.Console.WriteLine('.');
+            System.Console.WriteLine('.');
+            System.Console.WriteLine('.');
             System.Console.WriteLine();
 
-            System.Console.WriteLine("name, last_name");
-            where_clause = "ID > 7";
-            order_by = "ORDER BY ID ASC";
-            System.Console.WriteLine("where_clause = " + where_clause);
-            System.Console.WriteLine("order_by = " + order_by);
-            Table tablilla_where2 = tablilla.GetSubTable(new List<string> {"name", "last_name"}, where_clause, order_by);
-            System.Console.WriteLine();
-            tablilla_where2.show();
-
-            // tablilla_where2.add_row("Olivia", "Craw");
-            // tablilla_where2.add_row("Wendy", "Bishop");
-            // tablilla_where2.add_row("Sally", "Drew");
-            // tablilla_where2.add_row("Lucy", "Randolph");
-            // tablilla_where2.add_row("Tilly", "Dryden");
-            // tablilla_where2.add_row("Noelle", "Crowley");
-            // tablilla_where2.add_row("Dixie", "Ardwick");
-            // tablilla_where2.add_row("Denise", "Clark");
-
-            // tablilla_where2.show();
-
-            tablilla_where2.Update("last_name", "Nan", "last_name like \"w\"");
-            
-            tablilla_where2.show("After updating 'w' last_names");
-
-            tablilla_where2.Delete("name like \"i\"");
-            tablilla_where2.show("Delete WHERE name like \"i\"");
-
-            tablilla_where2.TableToFile();
-
+            DataStructures.Tables.Table read_from_file = Table.FileToTable("tablilla");
         }
     }

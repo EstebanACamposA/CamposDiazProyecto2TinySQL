@@ -1,0 +1,23 @@
+ID
+ID name last_name 
+INT VARCHAR(30) VARCHAR(30) 
+6 Franny Flagg 
+787 Emmy Delaire 
+7 Emmy Delaire 
+8 Molly Mandenhall 
+9 Polly Spiegel 
+10 Amy Khatri 
+0 Olivia Craw 
+1 Wendy Bishop 
+11 Sally Drew 
+357 Lulu 165 
+649 Tilly Dryden 
+21 Noelle Crowley 
+12 Dixie Ardwick 
+13 Denise Clark 
+14 Tabby DAngelo 
+15 Madison Starcher 
+16 Vivi Stephenson 
+17 Meredith Sterling 
+18 Emmet Winslow 
+19 Vicky Winslow 

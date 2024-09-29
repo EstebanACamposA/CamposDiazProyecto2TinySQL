@@ -1,0 +1,10 @@
+ID
+name last_name 
+VARCHAR(30) VARCHAR(30) 
+Molly Mandenhall 
+Polly Spiegel 
+Amy Khatri 
+Sally Nan 
+Noelle Nan 
+Lulu 165 
+Emmy Delaire 

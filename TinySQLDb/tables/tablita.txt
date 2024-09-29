@@ -1,0 +1,9 @@
+ID
+ID name last_name 
+INT VARCHAR(30) VARCHAR(30) 
+14 Tabby DAngelo
+15 Madison Starcher
+16 Vivi Stephenson
+17 Meredith Sterling
+18 Emmet Winslow
+19 Vicky Winslow

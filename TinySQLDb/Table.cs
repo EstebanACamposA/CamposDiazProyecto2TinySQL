@@ -621,7 +621,7 @@ namespace DataStructures
                 }
             }
 
-            public void TableToFile()
+            public void TableToFile(string file_name)
             {
                 string res = primary_key;
                 res += '\n';
@@ -665,8 +665,121 @@ namespace DataStructures
                 }
 
                 // THIS SHOULD NOT BE PRINTING A STRING. THIS SHOULD CREATE A .TXT FILE OF string res.
+                if (!file_name.EndsWith(".txt"))
+                {
+                    file_name += ".txt";
+                }
+                string filePath = "C:\\Users\\esteb\\OneDrive\\Documents\\D temp\\D\\TEC\\2024\\Semestre 2\\AyEdDI2\\Proyecto 2\\TinySQLDb\\tables\\" +file_name;
+
+                File.WriteAllText(filePath, res);
+
                 System.Console.WriteLine("res =\n" + res);
             }
+
+            public static Table FileToTable(string file_name)
+            {
+                if (file_name.EndsWith(".txt"))
+                {
+                    file_name = file_name.Replace(".txt", "");
+                }
+                string filePath = "C:\\Users\\esteb\\OneDrive\\Documents\\D temp\\D\\TEC\\2024\\Semestre 2\\AyEdDI2\\Proyecto 2\\TinySQLDb\\tables\\" + file_name + ".txt";
+
+                // Read the entire content of the file into a string
+                string[] lines = File.ReadAllLines(filePath);
+
+                string primary_key = lines[0];
+
+                string columns_string = lines[1];
+                List<string> columns = new();
+                while (Regex.IsMatch(columns_string, @"^\S+ "))
+                {
+                    // Finds a column string to add. Ends in space.
+                    Match column_match = Regex.Match(columns_string, @"^(\S+ )");
+                    string column = column_match.Groups[1].Value;
+                    // Removes the column from the columns_string, including the space.
+                    int column_len = column.Length;
+                    columns_string = columns_string.Substring(column_len);
+                    // Adds the column to the columns list, without the space.
+                    columns.Add(column.Trim());
+                }
+                
+                string column_types_string = lines[2];
+                List<string> column_types = new();
+                while (Regex.IsMatch(column_types_string, @"^\S+ "))
+                {
+                    // Finds a column_type string to add. Ends in space.
+                    Match column_match = Regex.Match(column_types_string, @"^(\S+ )");
+                    string type = column_match.Groups[1].Value;
+                    // Removes the column_type from the column_types_string, including the space.
+                    int column_len = type.Length;
+                    column_types_string = column_types_string.Substring(column_len);
+                    // Adds the column_type to the columns list, without the space.
+                    column_types.Add(type.Trim());
+                }
+                
+
+                // Instantiates a Table the object with empty rows.
+                // System.Console.WriteLine("At FileToTable, instantiates new table with ");
+                // for (int i = 0; i < columns.Count; i++)
+                // {
+                //     System.Console.Write("'" + columns[i] + "'\t");
+                // }
+                // System.Console.WriteLine();
+                // for (int i = 0; i < column_types.Count; i++)
+                // {
+                //     System.Console.Write("'" + column_types[i] + "'\t");
+                // }
+                // System.Console.WriteLine();
+                // System.Console.WriteLine("primary_key = " + primary_key);
+                DataStructures.Tables.Table result_table = new(columns, column_types, primary_key);
+
+                int total_lines = lines.Count();
+                int column_amount = column_types.Count;
+                for (int i = 3; i < total_lines; i++)
+                {
+                    // object array to call table.add_row().
+                    object[] row_to_add = new object[column_amount];
+                    // Gets the current row as a string of values separated by spaces.
+                    string current_row_values_string = lines[i];
+                    // While loop populates row_to_add with corresponding data types. 
+                    int j = 0;
+                    while (Regex.IsMatch(current_row_values_string, @"^\S+ "))
+                    {
+                        Match current_row_value_match = Regex.Match(current_row_values_string, @"^(\S+ )");
+                        string current_row_value = current_row_value_match.Groups[1].Value;
+
+                        int current_row_value_len = current_row_value.Length;
+                        current_row_values_string = current_row_values_string.Substring(current_row_value_len);
+
+                        string type = column_types[j];
+                        if (type.Equals("INT"))
+                        {
+                            row_to_add[j] = int.Parse(current_row_value.Trim());
+                        }
+                        if (type.Equals("DOUBLE"))
+                        {
+                            row_to_add[j] = double.Parse(current_row_value.Trim());
+                        }
+                        if (Regex.IsMatch(type, @"^VARCHAR\(\d+\)$"))
+                        {
+                            row_to_add[j] = current_row_value.Trim();
+                        }
+                        if (type.Equals("DATETIME"))
+                        {
+                            row_to_add[j] = current_row_value.Trim();
+                        }
+                        j++;
+                    }
+                    result_table.add_row(row_to_add);
+                    // result_table.show("Showing partial table from FileToTable method");
+                }
+                result_table.show("Table from file: '" + file_name +"'");
+                return result_table;
+
+            }
+
+
+
 
         }
 
