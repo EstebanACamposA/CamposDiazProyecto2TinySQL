@@ -34,7 +34,8 @@ namespace DataStructures
                 }
                 if (!valid_primary_key)
                 {
-                    System.Console.WriteLine("ERROR AT CREATING TABLE: primary key does not match any column name.");
+                    // This is not an error when creating a subtable.
+                    // System.Console.WriteLine("ERROR AT CREATING TABLE: primary key does not match any column name.");
                 }
 
 
@@ -68,6 +69,11 @@ namespace DataStructures
                 {
                     // Validates for each of the 4 data types that the value is correct for the column.
                     ValidateTableValue(column_types[i], values[i]);
+                    // Validates that the value is unique for the primary key.
+                    if (cols[i].Equals(primary_key))
+                    {
+                        ValidatePrimaryKey(-1, values[i]);
+                    }
 
                     new_row.Add(cols[i], values[i]);
 
@@ -189,39 +195,478 @@ namespace DataStructures
                 ValidateTableValue(column_type, value);
                 if (column_name.Equals(primary_key))
                 {
-                    ValidatePrimaryKeyOnUpdate(row, value);
+                    ValidatePrimaryKey(row, value);
                 }
                 rows[row][column_name] = value;
             }
 
-            public void ValidatePrimaryKeyOnUpdate(int updated_row, object value)
+            public void ValidatePrimaryKey(int updated_row, object value)
             {
                 int row_amount = rows.Count;
                 bool is_different = true;
                 for (int i = 0; i < row_amount; i++)
                 {
-                    if (i != updated_row & rows[i][primary_key].Equals(value))     //Can Equals compare two objects?
+                    if (i != updated_row & rows[i][primary_key].Equals(value))     //Can Equals compare two Object objects?
                     {
                         is_different = false;
                     }
                 }
                 if (!is_different)
                 {
-                    throw new ArgumentException("Error on ValidatePrimaryKeyOnUpdate: updated primary key is already in use.");
+                    throw new ArgumentException("Error on ValidatePrimaryKey: primary key is already in use.");
                 }
             }
 
 
+            public Table GetSubTable(List<string> column_names, string where, string order_by)
+            {
+                List<string> column_types = new();
+
+                // Get the types associated with the given column names
+                int total_cols = cols.Count();
+                foreach (var sub_table_column_name in column_names)
+                {
+                    for (int i = 0; i < total_cols; i++)
+                    {
+                        if (sub_table_column_name.Equals(this.cols[i]))
+                        {
+                            column_types.Add(this.column_types[i]);
+                        }
+                    }
+                }
+
+                // If column_names and column_types are not the same length,
+                // it means a given column name is not in this table's columns and should not have been requested.
+
+                Table res = new(column_names, column_types, this.primary_key);
+
+                // Fills subtable according to the where clause.
+                bool has_not = false;
+                while (where.StartsWith("not "))
+                {
+                    has_not ^= true;
+                    where = where.Remove(0, 4);
+                }
+                // Checks if remaining where clause is valid.
+                if (!Regex.IsMatch(where, @"^.+([>,<,=,]| like ).+$"))
+                {
+                    throw new ArgumentException("Invalid where statement in GetSubTable().");                    
+                }
+                
+                // Gets the operands of the where clause.
+                Match match = Regex.Match(where, @"^(.+)([>,<,=,]| like )(.+$)");
+                string operand_1 = match.Groups[1].Value;
+                // Match op2_match = Regex.Match(where, @"^.+[>,<,=,]| like (.+)$");
+                string operand_2 = match.Groups[3].Value;
+                // Checks if the operands refer to a column and removes quotes.
+                bool operand_1_is_column = false;
+                bool operand_2_is_column = false;
+                operand_1 = operand_1.Trim();
+                operand_2 = operand_2.Trim();
+                string quotes_pattern = "^\".*\"$";
+                if (Regex.IsMatch(operand_1, quotes_pattern) )
+                {
+                    operand_1 = operand_1.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_1, @"^\d+$"))
+                {
+                    operand_1_is_column = true;
+                }
+                if (Regex.IsMatch(operand_2, quotes_pattern) )
+                {
+                    operand_2 = operand_2.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_2, @"^\d+$"))
+                {
+                    operand_2_is_column = true;
+                }
+                // Gets the operation.
+                // Match operation_match = Regex.Match(where, @"([>,<,=,]| like )");
+                string operation = match.Groups[2].Value;
+
+                // Executes the ORDER BY clause.
+                // Order By generates a clone of current Table that is ordered as requested.
+                // Gets the column to order by and DESC or ASC.
+                order_by = order_by.Replace("ORDER BY", "");
+                order_by = order_by.Trim();
+                Match order_by_match = Regex.Match(order_by, @"^(.+) (.+$)");
+                string order_by_column = order_by_match.Groups[1].Value;
+                order_by_column = order_by_column.Trim();
+                string order_by_direction = order_by_match.Groups[2].Value;
+                order_by_direction = order_by_direction.Trim();
+                
+                bool order_by_direction_bool = false;
+                if (order_by_direction.Equals("DESC"))
+                {
+                    order_by_direction_bool = true;
+                }
+
+                this.OrderBy(order_by_direction_bool, order_by_column, this);
+
+                // After Order By, builds subtable according to where clause.
+                int row_amount = rows.Count;
+                for (int i = 0; i < row_amount; i++)
+                {
+                    // System.Console.WriteLine("where = " + where);
+                    // System.Console.WriteLine("operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i,");
+                    // System.Console.WriteLine("Enters WhereOperation with " + operand_1+"," + operand_2+"," + operation+"," + operand_1_is_column+"," + operand_2_is_column+"," + i);
+                    if (WhereOperation(operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i, this) ^ has_not)
+                    {
+                        int res_cols_amount = res.cols.Count;
+                        object[] elements_of_new_row = new object[res_cols_amount];
+
+                        // For each row, given the where clause is true,
+                        // fills an array of elements with only the values of the specified columns
+                        // and adds a new row to the result table (res).
+                        for (int j = 0; j < res_cols_amount; j++)
+                        {
+                            elements_of_new_row[j] = this.rows[i][res.cols[j]];
+                        }
+                        res.add_row(elements_of_new_row);
+                    }
+                }
+                return res;
 
 
 
+            }
 
+            private bool WhereOperation(string op1, string op2, string operation, bool op1_is_column, bool op2_is_column, int row, Table table)
+            {
+                // Dictionary<string, object> row_to_add;
+                bool include_row = false;
 
+                // Gets the actual values of op1 and 2 if they represent columns.
+                // If op1 is a column name, gets the value of that column in current row cast to string. Can cast from Int or Double 
+                // object op1_actual_value = op1;
+                object op1_actual_value = double.TryParse(op1, out double op1_parse) ? op1_parse : op1;
+                if (op1_is_column)
+                {
+                    // System.Console.WriteLine("op1 was " + op1);
+                    // System.Console.WriteLine("op1 attempts to be " + table.rows[row][op1]);
+                    op1_actual_value = table.rows[row][op1];
+                    if (op1_actual_value is int int_value)
+                    {
+                        op1 = int_value.ToString();
+                    }
+                    else if (op1_actual_value is double double_value)
+                    {
+                        op1 = double_value.ToString();
+                    }
+                    else
+                    {
+                        op1 = (string)op1_actual_value;    
+                    }
+                    // System.Console.WriteLine("op1 is " + op1);  
+                }
+                // If op2 is a column name, gets the value of that column in current row cast to string. Can cast from Int or Double
+                object op2_actual_value = double.TryParse(op2, out double op2_parse) ? op2_parse : op2;
+                if (op2_is_column)
+                {
+                    // System.Console.WriteLine("op2 was " + op2);
+                    // System.Console.WriteLine("op2 attempts to be " + table.rows[row][op2]);
+                    op2_actual_value = table.rows[row][op2];
+                    if (op2_actual_value is int int_value)
+                    {
+                        op2 = int_value.ToString();
+                    }
+                    else if (op2_actual_value is double double_value)
+                    {
+                        op2 = double_value.ToString();
+                    }
+                    else
+                    {
+                        op2 = (string)op2_actual_value;    
+                    }
+                    // System.Console.WriteLine("op2 is " + op2);  
+                }
 
+                // Asserts the boolean operation.
+                double double_op1_actual_value;
+                double double_op2_actual_value;
+                switch (operation)
+                {
+                    case ">":
+                        if (op1_actual_value is string | op2_actual_value is string)
+                        {
+                            if (string.Compare(op1, op2) > 0)
+                            {
+                                include_row = true;
+                            }
+                            break;    
+                        }
+                        double_op1_actual_value = op1_actual_value is int ? (double)(int)op1_actual_value : (double)op1_actual_value;
+                        double_op2_actual_value = op2_actual_value is int ? (double)(int)op2_actual_value : (double)op2_actual_value;
+                        if (double_op1_actual_value > double_op2_actual_value)
+                        {
+                            include_row = true;
+                        }
+                        break;
+                    case "<":
+                        if (op1_actual_value is string | op2_actual_value is string)
+                        {
+                            if (string.Compare(op1, op2) < 0)
+                            {
+                                include_row = true;
+                            }
+                            break;    
+                        }
+                        double_op1_actual_value = op1_actual_value is int ? (double)(int)op1_actual_value : (double)op1_actual_value;
+                        double_op2_actual_value = op2_actual_value is int ? (double)(int)op2_actual_value : (double)op2_actual_value;
+                        if (double_op1_actual_value < double_op2_actual_value)
+                        {
+                            include_row = true;
+                        }
+                        break;
+                        
+                    case "=":
+                        if (op1_actual_value is string | op2_actual_value is string)
+                        {
+                            if (string.Compare(op1, op2) == 0)
+                            {
+                                include_row = true;
+                            }
+                            break;    
+                        }
+                        double_op1_actual_value = op1_actual_value is int ? (double)(int)op1_actual_value : (double)op1_actual_value;
+                        double_op2_actual_value = op2_actual_value is int ? (double)(int)op2_actual_value : (double)op2_actual_value;
+                        if (double_op1_actual_value == double_op2_actual_value)
+                        {
+                            include_row = true;
+                        }
+                        break;
+                        
+                    case " like ":
+                        // System.Console.WriteLine("Enters like operation with " + op1 + op2);
+                        if (op1.Contains(op2))
+                        {
+                            include_row = true;
+                        }
+                        break;
+                    default:
+                        System.Console.WriteLine("Error at WhereOperation: shouldn't reach default in operation switch case.");
+                        break;
+                }
 
+                // System.Console.WriteLine("Where clause returns " + include_row + " at row " + row);
+                return include_row;
+            }
 
+            public Table OrderBy(bool direction, string column_name, Table table)
+            {
+                // System.Console.WriteLine();
+                // System.Console.WriteLine("ENTERS ORDERBY");
+                // table.show("Before sort:");
+                if (direction)
+                {
+                    try
+                    {
+                        table.rows.Sort((r1, r2) => string.Compare((string)r2[column_name], (string)r1[column_name]));    
+                    }
+                    catch (System.Exception)
+                    {
+                        try
+                        {
+                            table.rows.Sort((r1, r2) => ((double)r2[column_name]).CompareTo((double)r1[column_name]));    
+                        }
+                        catch (System.Exception)
+                        {
+                            
+                            table.rows.Sort((r1, r2) => ((int)r2[column_name]).CompareTo((int)r1[column_name]));
+                        }
+                        
+                    }   
+                }
+                else
+                {
+                    try
+                    {
+                        table.rows.Sort((r1, r2) => string.Compare((string)r1[column_name], (string)r2[column_name]));    
+                    }
+                    catch (System.Exception)
+                    {
+                        try
+                        {
+                            table.rows.Sort((r1, r2) => ((double)r1[column_name]).CompareTo((double)r2[column_name]));    
+                        }
+                        catch (System.Exception)
+                        {
+                            
+                            table.rows.Sort((r1, r2) => ((int)r1[column_name]).CompareTo((int)r2[column_name]));
+                        }
+                    }
+                }
+                
+                // System.Console.WriteLine();
+                // table.show("From OrderBy() After sort:");
+                // System.Console.WriteLine();
+                return table;
+            }
 
+            public void Delete(string where)
+            {
+                bool has_not = false;
+                while (where.StartsWith("not "))
+                {
+                    has_not ^= true;
+                    where = where.Remove(0, 4);
+                }
+                // Checks if remaining where clause is valid.
+                if (!Regex.IsMatch(where, @"^.+([>,<,=,]| like ).+$"))
+                {
+                    throw new ArgumentException("Invalid where statement in GetSubTable().");                    
+                }
+                
+                // Gets the operands of the where clause.
+                Match match = Regex.Match(where, @"^(.+)([>,<,=,]| like )(.+$)");
+                string operand_1 = match.Groups[1].Value;
+                // Match op2_match = Regex.Match(where, @"^.+[>,<,=,]| like (.+)$");
+                string operand_2 = match.Groups[3].Value;
+                // Checks if the operands refer to a column and removes quotes.
+                bool operand_1_is_column = false;
+                bool operand_2_is_column = false;
+                operand_1 = operand_1.Trim();
+                operand_2 = operand_2.Trim();
+                string quotes_pattern = "^\".*\"$";
+                if (Regex.IsMatch(operand_1, quotes_pattern) )
+                {
+                    operand_1 = operand_1.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_1, @"^\d+$"))
+                {
+                    operand_1_is_column = true;
+                }
+                if (Regex.IsMatch(operand_2, quotes_pattern) )
+                {
+                    operand_2 = operand_2.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_2, @"^\d+$"))
+                {
+                    operand_2_is_column = true;
+                }
+                // Gets the operation.
+                // Match operation_match = Regex.Match(where, @"([>,<,=,]| like )");
+                string operation = match.Groups[2].Value;
 
+                int row_amount = rows.Count;
+                for (int i = 0; i < row_amount; i++)
+                {
+                    // System.Console.WriteLine("where = " + where);
+                    // System.Console.WriteLine("operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i,");
+                    // System.Console.WriteLine("Enters WhereOperation with " + operand_1+"," + operand_2+"," + operation+"," + operand_1_is_column+"," + operand_2_is_column+"," + i);
+                    if (WhereOperation(operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i, this) ^ has_not)
+                    {
+                        rows.RemoveAt(i);
+                        i--;
+                        row_amount --;
+                    }
+                }
+            }
+
+            public void Update(string column_name, object value, string where)
+            {
+                bool has_not = false;
+                while (where.StartsWith("not "))
+                {
+                    has_not ^= true;
+                    where = where.Remove(0, 4);
+                }
+                // Checks if remaining where clause is valid.
+                if (!Regex.IsMatch(where, @"^.+([>,<,=,]| like ).+$"))
+                {
+                    throw new ArgumentException("Invalid where statement in GetSubTable().");                    
+                }
+                
+                // Gets the operands of the where clause.
+                Match match = Regex.Match(where, @"^(.+)([>,<,=,]| like )(.+$)");
+                string operand_1 = match.Groups[1].Value;
+                // Match op2_match = Regex.Match(where, @"^.+[>,<,=,]| like (.+)$");
+                string operand_2 = match.Groups[3].Value;
+                // Checks if the operands refer to a column and removes quotes.
+                bool operand_1_is_column = false;
+                bool operand_2_is_column = false;
+                operand_1 = operand_1.Trim();
+                operand_2 = operand_2.Trim();
+                string quotes_pattern = "^\".*\"$";
+                if (Regex.IsMatch(operand_1, quotes_pattern) )
+                {
+                    operand_1 = operand_1.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_1, @"^\d+$"))
+                {
+                    operand_1_is_column = true;
+                }
+                if (Regex.IsMatch(operand_2, quotes_pattern) )
+                {
+                    operand_2 = operand_2.Replace("\"","");
+                }
+                else if (!Regex.IsMatch(operand_2, @"^\d+$"))
+                {
+                    operand_2_is_column = true;
+                }
+                // Gets the operation.
+                // Match operation_match = Regex.Match(where, @"([>,<,=,]| like )");
+                string operation = match.Groups[2].Value;
+
+                int row_amount = rows.Count;
+                for (int i = 0; i < row_amount; i++)
+                {
+                    // System.Console.WriteLine("where = " + where);
+                    // System.Console.WriteLine("operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i,");
+                    // System.Console.WriteLine("Enters WhereOperation with " + operand_1+"," + operand_2+"," + operation+"," + operand_1_is_column+"," + operand_2_is_column+"," + i);
+                    if (WhereOperation(operand_1, operand_2, operation, operand_1_is_column, operand_2_is_column, i, this) ^ has_not)
+                    {
+                        UpdateRowValue(i, column_name, value);
+                    }
+                }
+            }
+
+            public void TableToFile()
+            {
+                string res = primary_key;
+                res += '\n';
+                // Adds columns.
+                int column_amount = cols.Count;
+                for (int i = 0; i < column_amount; i++)
+                {
+                    res += cols[i] + ' ';
+                }
+                res += '\n';
+                // Adds column_types.
+                for (int i = 0; i < column_amount; i++)
+                {
+                    res += column_types[i] + ' ';
+                }
+                // Adds rows values
+                int row_amount = rows.Count;
+                for (int i = 0; i < row_amount; i++)
+                {
+                    res += '\n';
+                    for (int j = 0; j < column_amount; j++)
+                    {
+                        string value_to_add = "";
+                        if (rows[i][cols[j]] is int value_to_add_int)
+                        {
+                            value_to_add = value_to_add_int.ToString();
+                        }
+                        if (rows[i][cols[j]] is double value_to_add_double)
+                        {
+                            value_to_add = value_to_add_double.ToString();
+                        }
+                        if (value_to_add.Equals(""))
+                        {
+                            res += (string)rows[i][cols[j]] + ' ';
+                        }
+                        else
+                        {
+                            res += value_to_add + ' ';
+                        }
+                    }
+                }
+
+                // THIS SHOULD NOT BE PRINTING A STRING. THIS SHOULD CREATE A .TXT FILE OF string res.
+                System.Console.WriteLine("res =\n" + res);
+            }
 
         }
 
