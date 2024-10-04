@@ -1,0 +1,110 @@
+{
+  "databases": [
+    {
+      "name": "Universidad",
+      "tables": [
+        {
+          "name": "Estudiante",
+          "columns": [
+            {
+              "name": "ID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "Nombre",
+              "type": "STRING"
+            },
+            {
+              "name": "PrimerApellido",
+              "type": "STRING"
+            },
+            {
+              "name": "SegundoApellido",
+              "type": "STRING"
+            },
+            {
+              "name": "FechaNacimiento",
+              "type": "DATETIME"
+            }
+          ],
+          "PK": "ID",
+          "index": "ID"
+        },
+        {
+          "name": "Curso",
+          "columns": [
+            {
+              "name": "ID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "Nombre",
+              "type": "STRING"
+            },
+            {
+              "name": "Creditos",
+              "type": "INTEGER"
+            }
+          ],
+          "PK": "ID",
+          "index": "ID"
+        }
+      ]
+    },
+    {
+      "name": "Biblioteca",
+      "tables": [
+        {
+          "name": "Libro",
+          "columns": [
+            {
+              "name": "ID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "Titulo",
+              "type": "STRING"
+            },
+            {
+              "name": "Autor",
+              "type": "STRING"
+            },
+            {
+              "name": "FechaPublicacion",
+              "type": "DATETIME"
+            }
+          ],
+          "PK": "ID",
+          "index": "ID"
+        },
+        {
+          "name": "Prestamo",
+          "columns": [
+            {
+              "name": "ID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "LibroID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "EstudianteID",
+              "type": "INTEGER"
+            },
+            {
+              "name": "FechaPrestamo",
+              "type": "DATETIME"
+            },
+            {
+              "name": "FechaDevolucion",
+              "type": "DATETIME"
+            }
+          ],
+          "PK": "ID",
+          "index": "ID"
+        }
+      ]
+    }
+  ]
+}

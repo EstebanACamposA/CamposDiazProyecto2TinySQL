@@ -1,0 +1,21 @@
+CREATE DATABASE Universidad;
+SET DATABASE Universidad;
+CREATE TABLE Estudiante (
+ID INTEGER,
+Nombre VARCHAR(30),
+PrimerApellido VARCHAR(30),
+SegundoApellido VARCHAR(30),
+FechaNacimiento DATETIME,
+PK ID
+);
+INSERT INTO Estudiante (1, "Isaac", "Ramirez", "Herrera", "2000-01-01
+01:02:00");
+INSERT INTO Estudiante (2, "Juan", "Ramirez", "X", "2000-01-01 01:02:00");
+INSERT INTO Estudiante (3, "Pedro", "Herrera", "Y", "2000-01-01 01:02:00");
+CREATE INDEX Estudiante_Id ON Estudiante(ID) OF TYPE BTREE;
+INSERT INTO Estudiante (1, "Andrés", "Ramirez", "2000-01-01 01:02:00");
+SELECT * FROM Estudiante WHERE ID = 2;
+SELECT Nombre FROM Estudiante WHERE ID = 2;
+SELECT * FROM Estudiante WHERE Apellido LIKE "mire" ORDER BY Nombre DESC;
+DELETE FROM Estudiante WHERE ID == 1;
+UPDATE SET Nombre = "Felipe" WHERE ID == 1;
