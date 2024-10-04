@@ -59,8 +59,8 @@ public class Program
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            string where_clause = "name like \"y\"";
-            string order_by = "ORDER BY name DESC";
+            string where_clause = "1 = 1";
+            string order_by = "ORDER BY last_name ASC";
             // Table table_where = t.GetSubTable(new List<string> {"name"}, where_clause, order_by);
             // System.Console.WriteLine();
 
@@ -102,5 +102,7 @@ public class Program
             System.Console.WriteLine();
 
             DataStructures.Tables.Table read_from_file = Table.FileToTable("tablilla");
+            Table subtable_of_read_from_file = read_from_file.GetSubTable(new List<string> {"name", "last_name"}, where_clause, order_by);
+            subtable_of_read_from_file.show("subtable_of_read_from_file");
         }
     }

@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
+using DataStructures.Nodes;
 
 namespace DataStructures
 {
@@ -53,6 +55,24 @@ namespace DataStructures
                 }
 
                 rows = new List<Dictionary<string, object>>();
+            }
+            public Table(TableTree table_tree)
+            {
+                this.primary_key = table_tree.primary_key;
+                this.cols = table_tree.cols;
+                this.column_types = table_tree.column_types;
+                rows = new List<Dictionary<string, object>>();
+                TreeToTableAux(this, table_tree.root);
+            }
+            private void TreeToTableAux(Table table, TableTreeNode? root)
+            {
+                if (root == null)
+                {
+                    return;
+                }
+                table.rows.Add(root.data);
+                TreeToTableAux(table, root.left);
+                TreeToTableAux(table, root.right);
             }
 
             // Método para agregar una row a la tabla
@@ -301,7 +321,8 @@ namespace DataStructures
                     order_by_direction_bool = true;
                 }
 
-                this.OrderBy(order_by_direction_bool, order_by_column, this);
+                // this.OrderBy(order_by_direction_bool, order_by_column, this);        THIS CHANGED AFTER MAKING METHOD STATIC.
+                OrderBy(order_by_direction_bool, order_by_column, this);
 
                 // After Order By, builds subtable according to where clause.
                 int row_amount = rows.Count;
@@ -331,7 +352,7 @@ namespace DataStructures
 
             }
 
-            private bool WhereOperation(string op1, string op2, string operation, bool op1_is_column, bool op2_is_column, int row, Table table)
+            public bool WhereOperation(string op1, string op2, string operation, bool op1_is_column, bool op2_is_column, int row, Table table)
             {
                 // Dictionary<string, object> row_to_add;
                 bool include_row = false;
@@ -452,7 +473,7 @@ namespace DataStructures
                 return include_row;
             }
 
-            public Table OrderBy(bool direction, string column_name, Table table)
+            public static Table OrderBy(bool direction, string column_name, Table table)
             {
                 // System.Console.WriteLine();
                 // System.Console.WriteLine("ENTERS ORDERBY");
