@@ -1,0 +1,4 @@
+Nans
+ID
+ID Name Serial DoB 
+INT VARCHAR(30) INT DATETIME 

@@ -71,24 +71,73 @@ public class Program
 
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Prueba del server y cliente.
+            // // Prueba del server y cliente.
             // string address = "127.0.0.1";
             // int port = 8000;
             // TinySQL_Server.Start(address, port);
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            string system_catalog_path = "SystemCatalog/SystemCatalog.json";
-            string system_catalog_path_2 = "SystemCatalog/SystemCatalog2.json";
-            DatabaseManager dm = new(system_catalog_path);
+            // // DatabaseManager remove DB test.
+            // string system_catalog_path = "SystemCatalog/SystemCatalog.json";
+            // string system_catalog_path_2 = "SystemCatalog/SystemCatalog2.json";
+            // DatabaseManager dm = new(system_catalog_path);
             
-            Console.WriteLine(new string('-', Console.WindowWidth - 1));
-            dm.Show("Antes de remover la Pokedex");
+            // Console.WriteLine(new string('-', Console.WindowWidth - 1));
+            // dm.Show("Antes de remover la Pokedex");
 
-            dm.databases.Remove(dm.GetDatabase("Pokedex"));
-            Console.WriteLine(new string('-', Console.WindowWidth - 1));
-            dm.Show("Depuis de remover la Pokedex");
-            dm.SaveChanges(system_catalog_path_2);
-            
+            // dm.databases.Remove(dm.GetDatabase("Pokedex"));
+            // Console.WriteLine(new string('-', Console.WindowWidth - 1));
+            // dm.Show("Depuis de remover la Pokedex");
+            // dm.SaveChanges(system_catalog_path_2);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // // Create DB query test.
+            // string query = "CREATE DATABASE Sterling";
 
+            // Globals.dm.Show("Before adding data base. Using JSON: " + Globals.jsonFilePath);
+            // QueryProccesing.Execute(query);
+            // Globals.dm.Show("After adding data base. Using JSON: " + Globals.jsonFilePath);
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // // SET DATABASE???
+            // System.Console.Write("EL NOMBRE QUE ENCONTRO ES '" );
+            // System.Console.Write(QueryProccesing.GetDatabaseName("CreatE tabLE nans"));
+            // System.Console.WriteLine("'");
+
+
+            // File.WriteAllText("SystemCatalog/Mis tablitas/pruebaDesdeProgramme", "AVAST ES MALVADO???");
+
+            string query = "CREATE DATABASE EtR;";
+            QueryProccesing.Execute(query);
+
+            query = "SET DATABASE EtR;";
+            QueryProccesing.Execute(query);
+
+            query = "CREATE TABLE Nans (\n   ID INTEGER,\n   Name Varchar(30),\n   Serial INTEGER,\n   DoB DATETIME,\n   PRIMARY KEY (ID));";
+            System.Console.WriteLine("query\n" + query);
+            QueryProccesing.CreateTable(query);
+
+
+
+
+
+
+
+
+
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /// Regex tests.
+                // string get_column_pattern = @"(\w+) (\S+)";
+                // string pattern = @"\((.*?)\);";
+                // string query = "CREATE TABLE Nans (\n   ID INTEGER,\n   Name Varchar(30),\n   Serial INTEGER,\n   DoB DATETIME);";
+                // // string query = "ID INTEGER,";
+                // Match get_column_match = Regex.Match(query, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline);        
+                // if (get_column_match.Success)
+                // {
+                //     System.Console.WriteLine("Matched st.");
+                //     System.Console.WriteLine("get_column_match.Value = " + get_column_match.Value);
+                //     System.Console.WriteLine("get_column_match.Groups[0].Value = " + get_column_match.Groups[0].Value);
+                //     System.Console.WriteLine("get_column_match.Groups[1].Value = '" + get_column_match.Groups[1].Value + "'");
+                //     System.Console.WriteLine("get_column_match.Groups[2].Value = '" + get_column_match.Groups[2].Value + "'");
+                // }
         }
     }

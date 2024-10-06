@@ -16,16 +16,13 @@ namespace DataStructures
                                                 // It is meant to relate each column name to a data type 
                                                 // e. g.: {INT, VARCHAR(size), DATETIME, DOUBLE}
             public string primary_key;
+            public string table_name;
 
             // private List<Dictionary<string, object>> rows;
             public List<Dictionary<string, object>> rows;
 
-            public Table(List<string> cols, List<string> column_types, string primary_key)
+            public Table(List<string> cols, List<string> column_types, string primary_key, string table_name)
             {
-                this.cols = cols;
-                this.column_types = column_types;
-                this.primary_key = primary_key;
-
                 bool valid_primary_key = false;
                 foreach (var column_name in cols)
                 {
@@ -40,28 +37,51 @@ namespace DataStructures
                     // System.Console.WriteLine("ERROR AT CREATING TABLE: primary key does not match any column name.");
                 }
 
-
-                if (cols.Count != column_types.Count)
+                int column_amount = cols.Count;
+                if (column_amount != column_types.Count)
                 {
                     System.Console.WriteLine("ERROR AT CREATING TABLE: cols AND column_types DO NOT MATCH SIZES.");
                 }
                 
-                foreach (var column_type in column_types)
+                // foreach (var column_type in column_types)
+                // {
+                //     if (!( Regex.IsMatch(column_type, @"^INT$", RegexOptions.IgnoreCase) | column_type.Equals("DOUBLE") | Regex.IsMatch(column_type, @"^VARCHAR\(\d+\)$", RegexOptions.IgnoreCase) | column_type.Equals("DATETIME") ))
+                //     {
+                //         System.Console.WriteLine("ERROR AT CREATING TABLE: INVALID column_type: " + column_type);
+                //     }
+                // }
+                
+                for (int i = 0; i < column_amount; i++)
                 {
-                    if (!( column_type.Equals("INT") | column_type.Equals("DOUBLE") | Regex.IsMatch(column_type, @"^VARCHAR\(\d+\)$") | column_type.Equals("DATETIME") ))
+                    column_types[i] = column_types[i].ToUpper();
+                    if (Regex.IsMatch(column_types[i], @"^INTEGER$", RegexOptions.IgnoreCase))
                     {
-                        System.Console.WriteLine("ERROR AT CREATING TABLE: INVALID column_type: " + column_type);
+                        column_types[i] = "INT";
+                    }
+                    string current_column_type = column_types[i];
+                    if (!( current_column_type.Equals("INT") | current_column_type.Equals("DOUBLE") | Regex.IsMatch(current_column_type, @"^VARCHAR\(\d+\)$", RegexOptions.IgnoreCase) | current_column_type.Equals("DATETIME") ))
+                    {
+                        System.Console.WriteLine("ERROR AT CREATING TABLE: INVALID column_type: " + current_column_type);
                     }
                 }
 
+                this.cols = cols;
+                this.column_types = column_types;
+                this.primary_key = primary_key;
+                this.table_name = table_name;
+
                 rows = new List<Dictionary<string, object>>();
             }
+            public Table(List<string> cols, List<string> column_types, string primary_key) : this(cols, column_types, primary_key, ""){}
             public Table(TableTree table_tree)
             {
                 this.primary_key = table_tree.primary_key;
                 this.cols = table_tree.cols;
                 this.column_types = table_tree.column_types;
+                this.table_name = table_tree.table_name;
+
                 rows = new List<Dictionary<string, object>>();
+
                 TreeToTableAux(this, table_tree.root);
             }
             private void TreeToTableAux(Table table, TableTreeNode? root)
@@ -130,6 +150,19 @@ namespace DataStructures
             {
                 System.Console.WriteLine(message);
                 show();
+            }
+            public void show_column_types()
+            {
+                foreach (var type in column_types)
+                {
+                    Console.Write(type + "\t");
+                }
+                System.Console.WriteLine();
+            }
+            public void show_column_types(string message)
+            {
+                System.Console.WriteLine(message);
+                show_column_types();
             }
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -642,27 +675,32 @@ namespace DataStructures
                 }
             }
 
-            public void TableToFile(string file_name)
+            public void TableToFile(string file_name, string path)
             {
-                string res = primary_key;
-                res += '\n';
+                string res = table_name + "\n";
+                res += primary_key + "\n";
+                // System.Console.WriteLine("\tres = '" + res + "'");
                 // Adds columns.
                 int column_amount = cols.Count;
                 for (int i = 0; i < column_amount; i++)
                 {
                     res += cols[i] + ' ';
+                    // System.Console.WriteLine("\tres = '" + res + "'");
                 }
                 res += '\n';
+                // System.Console.WriteLine("\tres = '" + res + "'");
                 // Adds column_types.
                 for (int i = 0; i < column_amount; i++)
                 {
                     res += column_types[i] + ' ';
+                    // System.Console.WriteLine("\tres = '" + res + "'");
                 }
                 // Adds rows values
                 int row_amount = rows.Count;
                 for (int i = 0; i < row_amount; i++)
                 {
                     res += '\n';
+                    // System.Console.WriteLine("\tres = '" + res + "'");
                     for (int j = 0; j < column_amount; j++)
                     {
                         string value_to_add = "";
@@ -677,10 +715,12 @@ namespace DataStructures
                         if (value_to_add.Equals(""))
                         {
                             res += (string)rows[i][cols[j]] + ' ';
+                            // System.Console.WriteLine("\tres = '" + res + "'");
                         }
                         else
                         {
                             res += value_to_add + ' ';
+                            // System.Console.WriteLine("\tres = '" + res + "'");
                         }
                     }
                 }
@@ -690,11 +730,12 @@ namespace DataStructures
                 {
                     file_name += ".txt";
                 }
-                string filePath = "C:\\Users\\esteb\\OneDrive\\Documents\\D temp\\D\\TEC\\2024\\Semestre 2\\AyEdDI2\\Proyecto 2\\TinySQLDb\\tables\\" +file_name;
+                // string filePath = "C:\\Users\\esteb\\OneDrive\\Documents\\D temp\\D\\TEC\\2024\\Semestre 2\\AyEdDI2\\Proyecto 2\\TinySQLDb\\tables\\" +file_name;
 
-                File.WriteAllText(filePath, res);
+                // System.Console.WriteLine("Attempts to write at path + file_name '" + path + file_name + "'");
+                File.WriteAllText(path + file_name, res);
 
-                System.Console.WriteLine("res =\n" + res);
+                // System.Console.WriteLine("res =\n'" + res + "'");
             }
 
             public static Table FileToTable(string file_name)
@@ -708,9 +749,10 @@ namespace DataStructures
                 // Read the entire content of the file into a string
                 string[] lines = File.ReadAllLines(filePath);
 
-                string primary_key = lines[0];
+                string table_name = lines[0];
+                string primary_key = lines[1];
 
-                string columns_string = lines[1];
+                string columns_string = lines[2];
                 List<string> columns = new();
                 while (Regex.IsMatch(columns_string, @"^\S+ "))
                 {
@@ -724,7 +766,7 @@ namespace DataStructures
                     columns.Add(column.Trim());
                 }
                 
-                string column_types_string = lines[2];
+                string column_types_string = lines[3];
                 List<string> column_types = new();
                 while (Regex.IsMatch(column_types_string, @"^\S+ "))
                 {
@@ -752,11 +794,11 @@ namespace DataStructures
                 // }
                 // System.Console.WriteLine();
                 // System.Console.WriteLine("primary_key = " + primary_key);
-                DataStructures.Tables.Table result_table = new(columns, column_types, primary_key);
+                DataStructures.Tables.Table result_table = new(columns, column_types, primary_key, table_name);
 
                 int total_lines = lines.Count();
                 int column_amount = column_types.Count;
-                for (int i = 3; i < total_lines; i++)
+                for (int i = 4; i < total_lines; i++)
                 {
                     // object array to call table.add_row().
                     object[] row_to_add = new object[column_amount];

@@ -12,6 +12,7 @@ namespace DataStructures
             public string primary_key;
             public List<string> cols;
             public List<string> column_types;
+            public string table_name;
 
 
             public TableTree(Table table)
@@ -19,6 +20,7 @@ namespace DataStructures
                 this.primary_key = table.primary_key;
                 this.cols = table.cols;
                 this.column_types = table.column_types;
+                this.table_name = table.table_name;
 
                 this.root = new(table.rows[0]);
                 //Inserts all the rows compared by primary key.

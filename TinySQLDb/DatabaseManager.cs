@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
+using DataStructures.Tables;
+
+
 namespace Metadata
 {
 
@@ -73,6 +76,59 @@ namespace Metadata
             System.Console.WriteLine(message);
             Show();
         }
+        
+        public void AddDatabase(string db_name)
+        {
+            string db_path = Globals.DataPath+db_name;
+            try
+            {
+                if (!Directory.Exists(db_path))
+                {
+                    // Crea la carpeta
+                    Directory.CreateDirectory(db_path);
+                    databases.Add(new Database(db_name));
+                    SaveChanges(Globals.jsonFilePath);
+                    
+                    Console.WriteLine($"Folder created successfully at: {db_path}");
+                }
+                else
+                {
+                    Console.WriteLine($"Folder already exists at: {db_path}");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error creating folder: {e.Message}");
+            }
+
+        }
+
+
+
+
+        public void AddTable(DataStructures.Tables.Table table)
+        {
+            Metadata.Table table_to_add = new(table.table_name);
+            table_to_add.PK = table.primary_key;
+            List<Column> columns_to_add = [];
+
+            // Converts the input's columns and types to List<Column> for the output.
+            int column_amount = table.cols.Count;
+            for (int i = 0; i < column_amount; i++)
+            {
+                Column current_column_to_add = new(table.cols[i], table.column_types[i]);
+                columns_to_add.Add(current_column_to_add);
+            }
+            table_to_add.columns = columns_to_add;
+
+            this.GetDatabase(Globals.set_database).tables.Add(table_to_add);
+            SaveChanges(Globals.jsonFilePath);
+
+        }
+
+
+
+
     }
 
     public class Root
