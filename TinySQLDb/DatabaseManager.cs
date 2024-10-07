@@ -123,11 +123,27 @@ namespace Metadata
 
             this.GetDatabase(Globals.set_database).tables.Add(table_to_add);
             SaveChanges(Globals.jsonFilePath);
-
         }
 
+        public void DropTable(string table_name)
+        {
+            Database current_db = this.GetDatabase(Globals.set_database);
+            Metadata.Table table_to_delete = current_db.tables.Find(table => table.name.Equals(table_name, StringComparison.OrdinalIgnoreCase));
+            current_db.tables.Remove(table_to_delete);
 
+            SaveChanges(Globals.jsonFilePath);
+        }
 
+        // public void UpdateTable(string table_name)
+        // {
+        //     // Database current_db = this.GetDatabase(Globals.set_database);
+        //     // current_db.tables.Find(table => table.name.Equals(table_name, StringComparison.OrdinalIgnoreCase));
+        //     // current_db.tables.Remove(table_to_delete);
+
+        //     // SaveChanges(Globals.jsonFilePath);
+
+            
+        // }
 
     }
 

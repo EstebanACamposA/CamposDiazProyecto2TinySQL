@@ -106,19 +106,34 @@ public class Program
             // File.WriteAllText("SystemCatalog/Mis tablitas/pruebaDesdeProgramme", "AVAST ES MALVADO???");
 
             string query = "CREATE DATABASE EtR;";
-            QueryProccesing.Execute(query);
+            // QueryProccesing.Execute(query);
 
             query = "SET DATABASE EtR;";
             QueryProccesing.Execute(query);
 
             query = "CREATE TABLE Nans (\n   ID INTEGER,\n   Name Varchar(30),\n   Serial INTEGER,\n   DoB DATETIME,\n   PRIMARY KEY (ID));";
-            System.Console.WriteLine("query\n" + query);
-            QueryProccesing.CreateTable(query);
+            // System.Console.WriteLine("query\n" + query);
+            // QueryProccesing.Execute(query);
+
+            // query = "DROP TABLE Nans;";
+            // QueryProccesing.Execute(query);
 
 
 
+            // query = "INSERT INTO Nans (1, \"Emmy\", 787, \"1960-01-09 01:02:00\");";
+            // QueryProccesing.Execute(query);
 
-
+            // query = "INSERT INTO Nans (2, \"Franny\", 887, \"2000-01-09 02:04:00\");";
+            // QueryProccesing.Execute(query);
+            
+            // query = "INSERT INTO Nans (3, \"Molly\", 807, \"2000-01-09 03:05:00\");";
+            // QueryProccesing.Execute(query);
+            
+            // query = "INSERT INTO Nans (4, \"Polly\", 808, \"2000-01-09 03:05:01\");";
+            // QueryProccesing.Execute(query);
+            
+            query = "SELECT Name FROM Nans WHERE ID > 1 ORDER BY Serial DESC;";
+            QueryProccesing.Execute(query);
 
 
 

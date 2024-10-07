@@ -146,6 +146,23 @@ namespace DataStructures
                 }
                 Console.WriteLine();
             }
+
+            public string show_string()
+            {
+                // Console.WriteLine(string.Join("\t", cols));
+                string res = string.Join("\t", cols) + "\n";
+
+                foreach (var row in rows)
+                {
+                    foreach (var col in cols)
+                    {
+                        res += row[col] + "\t";
+                    }
+                    res += "\n";
+                }
+                return res;
+            }
+
             public void show(string message)
             {
                 System.Console.WriteLine(message);
@@ -222,7 +239,7 @@ namespace DataStructures
                         {
                             string value_i_string = (string)value;
 
-                            if (!Regex.IsMatch(value_i_string, @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"))
+                            if (!Regex.IsMatch(value_i_string.Replace("\"", ""), @"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"))
                             {  
                                 // The string provided in a DATETIME column is not correct. 
                                 System.Console.WriteLine("The string provided in a DATETIME column is not correct.");
@@ -738,17 +755,26 @@ namespace DataStructures
                 // System.Console.WriteLine("res =\n'" + res + "'");
             }
 
-            public static Table FileToTable(string file_name)
+            public static Table FileToTable(string file_name, string[]? file_lines_direct_input)
             {
-                if (file_name.EndsWith(".txt"))
+                string[] lines = [];
+                if (file_lines_direct_input != null)
                 {
-                    file_name = file_name.Replace(".txt", "");
+                    lines = file_lines_direct_input;
                 }
-                string filePath = "C:\\Users\\esteb\\OneDrive\\Documents\\D temp\\D\\TEC\\2024\\Semestre 2\\AyEdDI2\\Proyecto 2\\TinySQLDb\\tables\\" + file_name + ".txt";
+                else
+                {
 
-                // Read the entire content of the file into a string
-                string[] lines = File.ReadAllLines(filePath);
+                    if (file_name.EndsWith(".txt"))
+                    {
+                        file_name = file_name.Replace(".txt", "");
+                    }
+                    string filePath = Globals.DataPath + Globals.set_database + "/" + file_name + ".txt"; 
 
+                    // Read the entire content of the file into a string
+                    lines = File.ReadAllLines(filePath);
+                }
+                
                 string table_name = lines[0];
                 string primary_key = lines[1];
 
@@ -808,11 +834,25 @@ namespace DataStructures
                     int j = 0;
                     while (Regex.IsMatch(current_row_values_string, @"^\S+ "))
                     {
-                        Match current_row_value_match = Regex.Match(current_row_values_string, @"^(\S+ )");
-                        string current_row_value = current_row_value_match.Groups[1].Value;
+                        string current_row_value = "";
+                        if (current_row_values_string.StartsWith("\""))
+                        {
+                            string pattern_for_strings_or_datetimes = "^(.+?\" )";
+                            Match current_row_value_match = Regex.Match(current_row_values_string, pattern_for_strings_or_datetimes);
+                            current_row_value = current_row_value_match.Groups[1].Value;    
+                        }
+                        else
+                        {
+                            Match current_row_value_match = Regex.Match(current_row_values_string, @"^(\S+ )");
+                            current_row_value = current_row_value_match.Groups[1].Value;    
+                        }
+                        
 
                         int current_row_value_len = current_row_value.Length;
                         current_row_values_string = current_row_values_string.Substring(current_row_value_len);
+
+                        // System.Console.WriteLine("j = " + j);
+                        System.Console.WriteLine($"type = column_types[{j}] = " + column_types[j]);
 
                         string type = column_types[j];
                         if (type.Equals("INT"))
@@ -825,13 +865,15 @@ namespace DataStructures
                         }
                         if (Regex.IsMatch(type, @"^VARCHAR\(\d+\)$"))
                         {
-                            row_to_add[j] = current_row_value.Trim();
+                            row_to_add[j] = current_row_value.Replace("\"", "").Trim();
                         }
                         if (type.Equals("DATETIME"))
                         {
                             row_to_add[j] = current_row_value.Trim();
                         }
                         j++;
+                        // System.Console.WriteLine("current_row_value = '" + current_row_value + "'");
+                        System.Console.WriteLine("current_row_values_string = '" + current_row_values_string + "'");
                     }
                     result_table.add_row(row_to_add);
                     // result_table.show("Showing partial table from FileToTable method");
