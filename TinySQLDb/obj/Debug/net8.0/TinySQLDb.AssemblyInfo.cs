@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TinySQLDb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d6c2bcb6679cb6642b3c7fa4c3fe5b2561df4fc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+721dd00da9812283506f4659b3d74ea60c2706c3")]
 [assembly: System.Reflection.AssemblyProductAttribute("TinySQLDb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TinySQLDb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
